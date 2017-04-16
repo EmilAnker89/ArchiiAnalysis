@@ -1,7 +1,6 @@
 .Rproj.user
 .Rhistory
-.RData
-.rds
-.RDS
-/Rscripts/plotly_all/.rds
+*.RData
+*.rds
+*.RDS
 /out
