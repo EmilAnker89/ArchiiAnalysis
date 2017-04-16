@@ -6,8 +6,8 @@ devtools::load_all(".")
 
 
 #Indlæs initialiseringsobjekt
-pca_df <<- readRDS(file = "pca.rds")
-doc_labs <<- readRDS(file = "labels.rds")
+pca_df <<- readRDS(file = "pca2.rds")
+doc_labs <<- readRDS(file = "labels2.rds")
 
 
 ui <- navbarPage("visApp",id="nav",

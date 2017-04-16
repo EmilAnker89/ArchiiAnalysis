@@ -17,12 +17,14 @@
 #' }
 
 
-read_data <- function(train, labels, features) {
+read_data <- function(train, labels, features=NULL) {
   train <- read.csv2(train, header=F, stringsAsFactors = F)
   labels <- read.table(labels, header=F, stringsAsFactors = F)[,1]
-  features <- read.table(features, header=F, stringsAsFactors = F)[,1]
   df <- apply(train, 2, as.numeric) %>% as.data.frame
-  names(df) <- features
+  if (!is.null(features)) {
+    features <- read.table(features, header=F, stringsAsFactors = F)[,1]
+    names(df) <- features
+  }
   df[["contract_label"]] <- labels
   df
 }
