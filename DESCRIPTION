@@ -6,4 +6,7 @@ Description: What the package does (one paragraph).
 Depends: R (>= 3.2.3)
 License: What license is it under?
 Encoding: UTF-8
+Imports:
+    magrittr
 LazyData: true
+RoxygenNote: 6.0.1.9000

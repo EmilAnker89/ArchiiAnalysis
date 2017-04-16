@@ -3,10 +3,12 @@
 train <- "out/data_import/contract_binarytrain_data.csv"
 labels <- "out/data_import/contract_binarytrain_labels.txt"
 features <- "out/data_import/contract_binarytrain_vocabulary.txt"
+
 df <- read_data(train, labels, features)
 non_labels <- setdiff(names(df),"contract_label")
 train <- df[,non_labels]
 
+#kunne være en t-SNE i stedet for PCA (måske bedre til plots):
 train.pca <- stats::prcomp(train,
                  center = TRUE,
                  scale. = FALSE, retx=T)
@@ -16,41 +18,29 @@ totvar <- sum(train.pca$sdev^2)
 var <- train.pca$sdev^2
 pct_var <- var/totvar
 #train.pca$rotation[1:5,1:10]
-#for top 10 PCs, find 20 features loading the highest:
-out <- list()
-for (i in 1:10) {
-  pc <- train.pca$rotation[,i]
-  pc_abs <- sort(abs(pc), decreasing=T)[1:20]
-  out[[paste0("pc",i)]] <- pc[match(names(pc_abs),names(pc))]
-}
+
+out <- condense(train.pca, 3, 20)
 
 lvls <- unique(df$contract_label)
 colors <- grDevices::rainbow(length(lvls))
-col_vector <- colors[match(test, lvls)]
+col_vector <- colors[match(df$contract_label, lvls)]
 #plot c1, c2 + labels
-#plot the two PCs with the highest median difference across:
-medians <- apply(train.pca$x[,1:10], 2, function(x) {
-  m <- lapply(lvls, function(y) {
-    subset <- match(df$contract_label,y)==1
-    median(x[subset], na.rm=T)
-  })
-  names(m) <- lvls
-  m[["max-diff"]] <-  max(unlist(m))-min(unlist(m))
-  m
-})
-pcs <- lapply(medians, "[[", "max-diff") %>% unlist %>% sort(.,decreasing=T)
-pcs <- match(names(pcs),names(medians))
+#find the two PCs with the highest median difference across:
+temp <- most_different_pc(train.pca, df$contract_label, 15)
+medians <- temp$medians
+pcs <- temp$pcs
 
-xlim = c(quantile(train.pca$x[,pcs[[1]]],.01),quantile(train.pca$x[,pcs[[1]]],.99))
-ylim = c(quantile(train.pca$x[,pcs[[2]]],.01),quantile(train.pca$x[,pcs[[2]]],.99))
-zlim = c(quantile(train.pca$x[,pcs[[3]]],.01),quantile(train.pca$x[,pcs[[3]]],.99))
+xlim <- c(quantile(train.pca$x[,pcs[[1]]],.01),quantile(train.pca$x[,pcs[[1]]],.99))
+ylim <- c(quantile(train.pca$x[,pcs[[2]]],.01),quantile(train.pca$x[,pcs[[2]]],.99))
+zlim <- c(quantile(train.pca$x[,pcs[[3]]],.01),quantile(train.pca$x[,pcs[[3]]],.99))
+
 plot(train.pca$x[match(df$contract_label,lvls[[1]]) %in% 1,pcs[[1]]],
      train.pca$x[match(df$contract_label,lvls[[1]]) %in% 1,pcs[[2]]],xlim=xlim,ylim=ylim, col=colors[[1]])
 abline(v=medians[pcs[[1]]][[1]][[1]], col=colors[[1]])
 abline(h=medians[pcs[[2]]][[1]][[1]], col=colors[[1]])
 
 points(train.pca$x[match(df$contract_label,lvls[[2]]) %in% 1,pcs[[1]]],
-     train.pca$x[match(df$contract_label,lvls[[2]]) %in% 1,pcs[[2]]], col=colors[[2]], add=T)
+     train.pca$x[match(df$contract_label,lvls[[2]]) %in% 1,pcs[[2]]], col=colors[[2]])
 abline(v=medians[pcs[[1]]][[1]][[2]], col=colors[[2]])
 abline(h=medians[pcs[[2]]][[1]][[2]], col=colors[[2]])
 
@@ -58,8 +48,8 @@ abline(h=medians[pcs[[2]]][[1]][[2]], col=colors[[2]])
 plot(train.pca$x[,pcs[[1]]],train.pca$x[,pcs[[2]]], xlim=xlim,ylim=ylim, col=col_vector)
 abline(v=medians[pcs[[1]]][[1]][[1]], col=colors[[1]])
 abline(v=medians[pcs[[1]]][[1]][[2]], col=colors[[2]])
-abline(h=medians[pcs[[1]]][[1]][[2]], col=colors[[2]])
-
+abline(h=medians[pcs[[2]]][[1]][[1]], col=colors[[1]])
+abline(h=medians[pcs[[2]]][[1]][[2]], col=colors[[2]])
 
 
 library(scatterplot3d)
