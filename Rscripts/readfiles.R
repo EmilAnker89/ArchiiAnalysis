@@ -12,6 +12,14 @@ train <- df[,non_labels]
 train.pca <- stats::prcomp(train,
                  center = TRUE,
                  scale. = FALSE, retx=T)
+
+
+#gem til brug i app:
+saveRDS(train.pca$x %>% as.data.frame, file = "Rscripts/plotly_app/pca.rds")
+labels <- read.table(labels, header=F, stringsAsFactors = F)[,1]
+saveRDS(labels, file = "Rscripts/plotly_app/labels.rds")
+
+
 #print(train.pca)
 plot(train.pca, type = "l", npcs=10)
 totvar <- sum(train.pca$sdev^2)
