@@ -13,7 +13,7 @@ condense <- function(pca, n, k) {
   for (i in seq_along(1:n)) {
     pc <- pca$rotation[,i]
     pc_abs <- sort(abs(pc), decreasing=T)[1:k]
-    out[[paste0("pc",i)]] <- pc[match(names(pc_abs), names(pc))]
+    out[[paste0("PC",i)]] <- pc[match(names(pc_abs), names(pc))]
   }
   out
 }
