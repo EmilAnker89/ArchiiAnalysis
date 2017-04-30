@@ -13,6 +13,10 @@ train.pca <- stats::prcomp(train,
                  center = TRUE,
                  scale. = FALSE, retx=T)
 
+# train.tsne <- Rtsne::Rtsne(train,
+#                            dims = 10)
+
+
 #print(train.pca)
 plot(train.pca, type = "l", npcs=10)
 totvar <- sum(train.pca$sdev^2)
@@ -20,7 +24,8 @@ var <- train.pca$sdev^2
 pct_var <- var/totvar
 #train.pca$rotation[1:5,1:10]
 
-out <- condense(train.pca, 3, 20)
+out <- condense(train.pca, 10, 20)
+
 
 lvls <- unique(df$contract_label)
 colors <- grDevices::rainbow(length(lvls))
