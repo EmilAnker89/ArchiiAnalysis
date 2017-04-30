@@ -8,7 +8,7 @@ devtools::load_all(".")
 #Indlæs initialiseringsobjekt
 pca_df <<- readRDS(file = "pca2.rds")
 doc_labs <<- readRDS(file = "labels2.rds")
-
+rotations <<- readRDS(file = "rotations.rds")
 
 ui <- navbarPage("visApp",id="nav",
                  tabPanel("Plot",
@@ -16,8 +16,10 @@ ui <- navbarPage("visApp",id="nav",
                           uiOutput("variabelb"),
                           actionButton(inputId="clear",label="Clear"),
                           fluidRow(plotlyOutput("p",height="600px")),
+                          fluidRow(tableOutput("rotation_x")),
+                          fluidRow(tableOutput("rotation_y")),
                           fluidRow(textOutput("mes"))),
-                 tabPanel("Valg data",
+                 tabPanel("Valgt data",
                           downloadButton('downloadData', 'Hent data som csv'),
                           fluidRow(tableOutput("tab"))))
 
@@ -46,6 +48,17 @@ server <- function(input, output) {
                      !is.na(mdldata[[var2]]) & is.finite(mdldata[[var2]]),]
     dat <- dat %>% group_by(labs) %>% mutate(id=paste0(1:n(),"-",as.numeric(labs)))
     dat
+  })
+
+  rotation_a <- reactive({
+    var1 <- input$variabelx
+    out <- rotations[[var1]]
+    out
+  })
+  rotation_b <- reactive({
+    var2 <- input$variabely
+    out <- rotations[[var2]]
+    out
   })
 
 
@@ -89,6 +102,12 @@ server <- function(input, output) {
     tmpdata[,1:10]
   }, include.rownames=TRUE)
 
+  output$rotation_x <- renderTable({
+    rotation_a()
+  })
+  output$rotation_y <- renderTable({
+    rotation_b()
+  })
 
   observeEvent(event.data1(),{
     id$mes <- as.vector(round(event.data1()$pointNumber+1,0))
