@@ -4,7 +4,8 @@ library(tidyr)
 library(magrittr)
 
 #read array-from-feature-extractor:
-test <- read.csv2("~/Desktop/test.csv", header = F)
+test <- read.csv2("~/Desktop/test.csv", header = F, stringsAsFactors = F)
+test <- apply(test, 2, as.numeric) %>% as.data.frame
 #fetch labels from mysql:
 read_user <- readRDS("~/read_mysql.rds")
 
@@ -18,10 +19,19 @@ tmp$tier <- paste0("tier_",tmp$tier)
 tmp$name <- paste0(tmp$index,": ",tmp$name)
 tmp <- spread(tmp[,c("document", "name", "tier")], tier, name)
 
-test2 <- left_join(test, tmp, by = c("id" = "document"))
+df <- left_join(test, tmp, by = c("id" = "document"))
 
 
+non_labels <- setdiff(names(df),c("id", "tier_0", "tier_1", "tier_2", "tier_3"))
+train <- df[,non_labels]
 
+#kunne være en t-SNE i stedet for PCA (måske bedre til plots):
+pca <- stats::prcomp(train,
+                           center = TRUE,
+                           scale. = FALSE, retx=T)
+
+saveRDS(pca$x %>% as.data.frame, file = "Rscripts/plotly_app/pca.rds")
+saveRDS(df[,c("id", "tier_0", "tier_1", "tier_2", "tier_3")], file = "Rscripts/plotly_app/labels.rds")
 
 
 

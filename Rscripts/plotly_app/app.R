@@ -6,18 +6,21 @@ devtools::load_all(".")
 
 
 #Indlæs initialiseringsobjekt
-pca_df <<- readRDS(file = "pca2.rds")
-doc_labs <<- readRDS(file = "labels2.rds")
-rotations <<- readRDS(file = "rotations.rds")
+pca_df <<- readRDS(file = "pca.rds")[,1:10]
+doc_labs <<- readRDS(file = "labels.rds")
+doc_labs <- lapply(doc_labs, function(x) {
+    if (is.character(x)) {as.factor(x)} else x}) %>% as.data.frame
+#rotations <<- readRDS(file = "rotations.rds")
 
 ui <- navbarPage("visApp",id="nav",
                  tabPanel("Plot",
                           uiOutput("variabela"),
                           uiOutput("variabelb"),
+                          uiOutput("tier"),
                           actionButton(inputId="clear",label="Clear"),
                           fluidRow(plotlyOutput("p",height="600px")),
-                          fluidRow(tableOutput("rotation_x")),
-                          fluidRow(tableOutput("rotation_y")),
+                          # fluidRow(tableOutput("rotation_x")),
+                          # fluidRow(tableOutput("rotation_y")),
                           fluidRow(textOutput("mes"))),
                  tabPanel("Valgt data",
                           downloadButton('downloadData', 'Hent data som csv'),
@@ -34,38 +37,48 @@ server <- function(input, output) {
     selectInput(inputId = "variabely",label="Vælg variabel Y",choices=unique(colnames(pca_df)), selected="PC2",selectize = TRUE)
   })
 
+  output$tier <- renderUI({
+    selectInput(inputId = "tier",label="Vælg et kategoriserings-niveau",choices=unique(setdiff(colnames(doc_labs), "id")), selected="tier_0",selectize = TRUE)
+  })
+
+
   #Datasættet
   mdldata <- pca_df
-  mdldata$labs <- as.factor(doc_labs)
+  mdldata <- cbind(pca_df, doc_labs)
+
   #Datamanipulation
 
   dat <- reactive({
     #De 2 variable
     var1 <- input$variabelx
     var2 <- input$variabely
+    tier <- input$tier
     #Datasæt
     dat <- mdldata[!is.na(mdldata[[var1]]) & is.finite(mdldata[[var1]]) &
                      !is.na(mdldata[[var2]]) & is.finite(mdldata[[var2]]),]
-    dat <- dat %>% group_by(labs) %>% mutate(id=paste0(1:n(),"-",as.numeric(labs)))
+    dat <- dat[!is.na(mdldata[[tier]]),]
+    #mutate_ skal bruge en lazyeval for at kunne tage input$tier i stedet for tier_0
+    dat <- dat %>% group_by_(tier) %>% mutate(index = paste0(1:n(),"-",as.numeric(tier_0)))
     dat
   })
 
-  rotation_a <- reactive({
-    var1 <- input$variabelx
-    out <- rotations[[var1]]
-    out
-  })
-  rotation_b <- reactive({
-    var2 <- input$variabely
-    out <- rotations[[var2]]
-    out
-  })
+  # rotation_a <- reactive({
+  #   var1 <- input$variabelx
+  #   out <- rotations[[var1]]
+  #   out
+  # })
+  # rotation_b <- reactive({
+  #   var2 <- input$variabely
+  #   out <- rotations[[var2]]
+  #   out
+  # })
 
 
   output$p <- renderPlotly({
     var_1 <- input$variabelx
     var_2 <- input$variabely
-    p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = "labs")) + #,col="Antal"
+    tier <- input$tier
+    p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier)) + #,col="Antal"
       geom_point(alpha=0.5) #+
 #      scale_color_manual("labs",breaks=c("Contracts", "Non-Contracts"),values=c("blue","#FF0000"),na.value=NA)
 
@@ -98,16 +111,16 @@ server <- function(input, output) {
 
   output$tab <- renderTable({
     tmpdata <- dat()
-    tmpdata <- tmpdata[tmpdata$id %in% id$id,]
-    tmpdata[,1:10]
+    tmpdata <- tmpdata[tmpdata$index %in% id$id,]
+    tmpdata[,c("id","tier_0", "tier_1", "tier_2", "tier_3")]
   }, include.rownames=TRUE)
 
-  output$rotation_x <- renderTable({
-    rotation_a()
-  })
-  output$rotation_y <- renderTable({
-    rotation_b()
-  })
+  # output$rotation_x <- renderTable({
+  #   rotation_a()
+  # })
+  # output$rotation_y <- renderTable({
+  #   rotation_b()
+  # })
 
   observeEvent(event.data1(),{
     id$mes <- as.vector(round(event.data1()$pointNumber+1,0))
@@ -126,8 +139,8 @@ server <- function(input, output) {
   finaltab <- reactive({
 
     tmpdata <- dat()
-    tmpdata <- tmpdata[tmpdata$id %in% id$id,]
-    tmpdata[,1:10]
+    tmpdata <- tmpdata[tmpdata$index %in% id$id,]
+    tmpdata[,c("id","tier_0", "tier_1", "tier_2", "tier_3")]
 
   })
 
