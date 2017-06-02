@@ -38,7 +38,7 @@ server <- function(input, output) {
   })
 
   output$tier <- renderUI({
-    selectInput(inputId = "tier",label="Vælg et kategoriserings-niveau",choices=unique(setdiff(colnames(doc_labs), "id")), selected="tier_0",selectize = TRUE)
+    selectInput(inputId = "tier",label="Vælg et kategoriserings-niveau",choices=c("tier_0", "tier_1", "tier_2", "tier_3"), selected="tier_0",selectize = TRUE)
   })
 
 
@@ -80,7 +80,7 @@ server <- function(input, output) {
     var_2 <- input$variabely
     tier <- input$tier
     text <- "PC10"
-    p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier, text=text)) +
+    p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier, text = text)) +
       geom_point(alpha=0.5)
 
     ggplotly(p,source="select")
@@ -113,7 +113,7 @@ server <- function(input, output) {
   output$tab <- renderTable({
     tmpdata <- dat()
     tmpdata <- tmpdata[tmpdata$index %in% id$id,]
-    tmpdata[,c("id","tier_0", "tier_1", "tier_2", "tier_3")]
+    tmpdata[,c("id", "path", "tier_0", "tier_1", "tier_2", "tier_3")]
   }, include.rownames=TRUE)
 
   # output$rotation_x <- renderTable({
@@ -141,7 +141,7 @@ server <- function(input, output) {
 
     tmpdata <- dat()
     tmpdata <- tmpdata[tmpdata$index %in% id$id,]
-    tmpdata[,c("id","tier_0", "tier_1", "tier_2", "tier_3")]
+    tmpdata[,c("id", "path", "tier_0", "tier_1", "tier_2", "tier_3")]
 
   })
 

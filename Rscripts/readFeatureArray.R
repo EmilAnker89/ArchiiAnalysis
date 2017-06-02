@@ -24,10 +24,9 @@ df <- left_join(test, tmp, by = c("id" = "document"))
 
 
 non_labels <- setdiff(names(df),c("id", "path", "tier_0", "tier_1", "tier_2", "tier_3"))
-train <- df[,non_labels]
 
 #kunne være en t-SNE i stedet for PCA (måske bedre til plots):
-pca <- stats::prcomp(train,
+pca <- stats::prcomp(df[,non_labels],
                            center = TRUE,
                            scale. = FALSE, retx=T)
 
