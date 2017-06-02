@@ -11,6 +11,7 @@ read_user <- readRDS("~/read_mysql.rds")
 
 mydb = dbConnect(MySQL(), user=read_user$user, password=read_user$pw, dbname=read_user$db, host=read_user$host)
 test$id <- dbGetQuery(mydb, "SELECT id FROM document;")$id #fingers crossed for ordering...
+test$path <- dbGetQuery(mydb, "SELECT path FROM userdocument;")$path
 docs_cat <- dbGetQuery(mydb, "SELECT * FROM documentclassification;")
 cats <- dbGetQuery(mydb, "SELECT * FROM category;")
 docs_cat <- left_join(docs_cat, cats[,c("id", "name", "index", "tier")], by=c("category"="id"))
@@ -22,7 +23,7 @@ tmp <- spread(tmp[,c("document", "name", "tier")], tier, name)
 df <- left_join(test, tmp, by = c("id" = "document"))
 
 
-non_labels <- setdiff(names(df),c("id", "tier_0", "tier_1", "tier_2", "tier_3"))
+non_labels <- setdiff(names(df),c("id", "path", "tier_0", "tier_1", "tier_2", "tier_3"))
 train <- df[,non_labels]
 
 #kunne være en t-SNE i stedet for PCA (måske bedre til plots):
@@ -31,7 +32,7 @@ pca <- stats::prcomp(train,
                            scale. = FALSE, retx=T)
 
 saveRDS(pca$x %>% as.data.frame, file = "Rscripts/plotly_app/pca.rds")
-saveRDS(df[,c("id", "tier_0", "tier_1", "tier_2", "tier_3")], file = "Rscripts/plotly_app/labels.rds")
+saveRDS(df[,c("id", "path", "tier_0", "tier_1", "tier_2", "tier_3")], file = "Rscripts/plotly_app/labels.rds")
 
 
 
