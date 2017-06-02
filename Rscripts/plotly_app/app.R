@@ -56,9 +56,10 @@ server <- function(input, output) {
     #Datasæt
     dat <- mdldata[!is.na(mdldata[[var1]]) & is.finite(mdldata[[var1]]) &
                      !is.na(mdldata[[var2]]) & is.finite(mdldata[[var2]]),]
-    dat <- dat[!is.na(mdldata[[tier]]),]
+    dat <- dat[!is.na(dat[[tier]]),]
     #mutate_ skal bruge en lazyeval for at kunne tage input$tier i stedet for tier_0
-    dat <- dat %>% group_by_(tier) %>% mutate(index = paste0(1:n(),"-",as.numeric(tier_0)))
+    dat <- dat %>% group_by_(tier) %>%
+      mutate_("index" = lazyeval::interp(~paste0(1:n(),"-",as.numeric(x)), x = as.name(tier)))
     dat
   })
 
@@ -78,9 +79,9 @@ server <- function(input, output) {
     var_1 <- input$variabelx
     var_2 <- input$variabely
     tier <- input$tier
-    p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier)) + #,col="Antal"
-      geom_point(alpha=0.5) #+
-#      scale_color_manual("labs",breaks=c("Contracts", "Non-Contracts"),values=c("blue","#FF0000"),na.value=NA)
+    text <- "PC10"
+    p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier, text=text)) +
+      geom_point(alpha=0.5)
 
     ggplotly(p,source="select")
   })
