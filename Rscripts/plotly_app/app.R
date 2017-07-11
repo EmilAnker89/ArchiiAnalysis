@@ -3,14 +3,17 @@ library(ggplot2)
 library(dplyr)
 library(lazyeval)
 #devtools::load_all(".")
-
+Sys.setlocale("LC_ALL", 'en_DK.utf-8')
 
 #Indlæs initialiseringsobjekt
 pca_df <<- readRDS(file = "pca.rds")[,1:10]
 doc_labs <<- readRDS(file = "labels.rds")
 doc_labs <- lapply(doc_labs, function(x) {
     if (is.character(x)) {as.factor(x)} else x}) %>% as.data.frame
-#rotations <<- readRDS(file = "rotations.rds")
+doc_labs$path <- enc2utf8(doc_labs$path)
+#validUTF8(doc_labs$path) %>% sum
+
+#pca_df[pca_df$PC1>=0.037 & pca_df$PC1<=0.0371 & pca_df$PC2>=-0.0628 & pca_df$PC2<=0.06282,]
 
 ui <- navbarPage("visApp",id="nav",
                  tabPanel("Plot",
@@ -82,7 +85,6 @@ server <- function(input, output) {
     text <- "PC10"
     p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier, text = text)) +
       geom_point(alpha=0.5)
-
 
     m <- list(
       l = 50,
