@@ -2,7 +2,7 @@ library(plotly)
 library(ggplot2)
 library(dplyr)
 library(lazyeval)
-devtools::load_all(".")
+#devtools::load_all(".")
 
 
 #Indlæs initialiseringsobjekt
@@ -18,7 +18,7 @@ ui <- navbarPage("visApp",id="nav",
                           uiOutput("variabelb"),
                           uiOutput("tier"),
                           actionButton(inputId="clear",label="Clear"),
-                          fluidRow(plotlyOutput("p",height="600px")),
+                          fluidRow(plotlyOutput("p",height="1200px", width = "1600px")),
                           # fluidRow(tableOutput("rotation_x")),
                           # fluidRow(tableOutput("rotation_y")),
                           fluidRow(textOutput("mes"))),
@@ -83,7 +83,15 @@ server <- function(input, output) {
     p <- ggplot2::ggplot(data=dat(), aes_string(x = var_1, y = var_2, col = tier, text = text)) +
       geom_point(alpha=0.5)
 
-    ggplotly(p,source="select")
+
+    m <- list(
+      l = 50,
+      r = 50,
+      b = 100,
+      t = 100,
+      pad = 4
+    )
+    ggplotly(p,source="select") %>% layout(autosize = F, width = 1000, height = 600, margin = m)
   })
 
 
