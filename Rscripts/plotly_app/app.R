@@ -2,7 +2,7 @@ library(plotly)
 library(ggplot2)
 library(dplyr)
 library(lazyeval)
-#devtools::load_all(".")
+
 Sys.setlocale("LC_ALL", 'en_DK.utf-8')
 
 #Indlæs initialiseringsobjekt
@@ -13,7 +13,6 @@ doc_labs <- lapply(doc_labs, function(x) {
 doc_labs$path <- enc2utf8(doc_labs$path)
 #validUTF8(doc_labs$path) %>% sum
 
-#pca_df[pca_df$PC1>=0.037 & pca_df$PC1<=0.0371 & pca_df$PC2>=-0.0628 & pca_df$PC2<=0.06282,]
 
 ui <- navbarPage("visApp",id="nav",
                  tabPanel("Plot",

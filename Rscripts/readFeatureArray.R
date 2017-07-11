@@ -1,7 +1,7 @@
 library(RMySQL)
 library(dplyr)
 library(tidyr)
-#library(magrittr)
+
 
 #read array-from-feature-extractor:
 test <- read.csv2("~/Desktop/feature_extracted.csv", header = F, stringsAsFactors = F)
