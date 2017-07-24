@@ -8,9 +8,11 @@ Sys.setlocale("LC_ALL", 'en_DK.utf-8')
 #Indlæs initialiseringsobjekt
 pca_df <<- readRDS(file = "pca.rds")[,1:10]
 doc_labs <<- readRDS(file = "labels.rds")
+
 doc_labs <- lapply(doc_labs, function(x) {
-    if (is.character(x)) {as.factor(x)} else x}) %>% as.data.frame
-doc_labs$path <- enc2utf8(doc_labs$path)
+    if (is.character(x)) {as.factor(enc2utf8(x))} else x}) %>% as.data.frame
+
+#doc_labs$path <- enc2utf8(doc_labs$path)
 #validUTF8(doc_labs$path) %>% sum
 
 
