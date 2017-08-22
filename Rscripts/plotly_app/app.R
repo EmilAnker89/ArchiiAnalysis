@@ -5,7 +5,7 @@ library(lazyeval)
 
 Sys.setlocale("LC_ALL", 'en_DK.utf-8')
 
-#Indlæs initialiseringsobjekt
+#Indlæs data
 pca_df <<- readRDS(file = "pca.rds")[,1:10]
 doc_labs <<- readRDS(file = "labels.rds")
 
